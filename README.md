@@ -1,23 +1,48 @@
 # Zeichnen & Erraten
 
-Zeichnen & Erraten is an optional Open Party Lab game package.
+Drawing and guessing party game for Open Party Lab with phone drawing controls and word categories.
 
-This repo is not a standalone app. Run it through the Open Party Lab platform:
+![In-game screenshot](docs/screenshots/host.png)
+
+## Status
+
+Alpha. The drawing and guessing loop is playable. Needs drawing-feel refinement, category/content review, and result presentation polish.
+
+## Run Through Open Party Lab
+
+This repo is not a standalone app. Run it through the Open Party Lab platform.
+
+Recommended layout:
+
+```text
+Open-Party-Lab/
+  local-games/
+    zeichnen-und-erraten/
+```
+
+From the Platform repo:
 
 ```bash
-cd ../../
 npm install
 npm run games:sync-local
 npm run dev:all
 ```
 
-The platform loads this game only when the repo exists locally and `npm run games:sync-local` links it.
+The Platform loads this game only when the repo exists locally and `npm run games:sync-local` links it. Missing optional games are skipped.
 
-## Lobby Setup
+## GitHub Metadata
 
-The word-category setup is declared in `src/manifest.ts` via `lobbySetup`. Open Party Lab renders that generic setup UI in the host lobby and sends `configure-lobby` actions back to this package.
+Description:
 
-Game-specific validation stays in `src/server/zeichnenUndErratenConfig.ts` and `src/server/index.ts`.
+```text
+Drawing and guessing party game for Open Party Lab with phone drawing controls and word categories.
+```
+
+Suggested topics:
+
+```text
+open-party-lab party-game browser-game phaser typescript local-multiplayer drawing-game
+```
 
 ## Package Entrypoints
 
@@ -27,6 +52,8 @@ Game-specific validation stays in `src/server/zeichnenUndErratenConfig.ts` and `
 - `@open-party-lab/game-zeichnen-und-erraten/host`
 - `@open-party-lab/game-zeichnen-und-erraten/controller`
 
+The Platform should import only these public entrypoints.
+
 ## Development Checks
 
 ```bash
@@ -35,3 +62,11 @@ npm run typecheck
 npm run build
 npm run pack:dry-run
 ```
+
+For visual checks, start Open Party Lab, add virtual controllers when needed, and capture host screenshots through a browser.
+
+## License
+
+Code is licensed under the Apache License 2.0. See [LICENSE](LICENSE).
+
+Assets, generated media, word lists, prompts, and third-party references may need separate rights review before public store distribution.
