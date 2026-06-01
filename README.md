@@ -6,7 +6,7 @@ Drawing and guessing party game for Open Party Lab with phone drawing controls a
 
 ## Status
 
-Alpha. The drawing and guessing loop is playable. Needs drawing-feel refinement, category/content review, and result presentation polish.
+Beta. The drawing and guessing loop is already good to play locally. Still needs drawing-feel refinement, category/content review, and result presentation polish before a stable release.
 
 ## Run Through Open Party Lab
 
