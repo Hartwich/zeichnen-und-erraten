@@ -1,6 +1,8 @@
 import Phaser from "phaser";
 import { zeichnenUndErratenManifest } from "../manifest.js";
 import { renderZeichnenUndErratenState } from "./ZeichnenUndErratenRenderer.js";
+import { renderRoundScreens } from "./roundScreens.js";
+import { tokens } from "./platformTheme.js";
 
 type SupportedLanguage = "de" | "en";
 
@@ -29,6 +31,11 @@ export class ZeichnenUndErratenHostScene extends Phaser.Scene {
     const client = this.registry.get("hostClient") as HostClientLike;
 
     this.unsubscribe = client.subscribe((state) => {
+      // Intro and result screens belong to this game, not the platform.
+      if (renderRoundScreens(this, state)) {
+        return;
+      }
+
       const gameState = state.game?.state as
         | {
             drawerName?: string;
@@ -42,7 +49,7 @@ export class ZeichnenUndErratenHostScene extends Phaser.Scene {
       const en = state.room?.language === "en";
 
       this.children.removeAll(true);
-      this.cameras.main.setBackgroundColor("#020617");
+      this.cameras.main.setBackgroundColor(tokens().color.background);
 
       renderZeichnenUndErratenState(
         this,

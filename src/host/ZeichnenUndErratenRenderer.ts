@@ -1,4 +1,5 @@
 import Phaser from "phaser";
+import { tokens } from "./platformTheme.js";
 
 type SupportedLanguage = "de" | "en";
 
@@ -68,7 +69,7 @@ export function renderZeichnenUndErratenState(
   scene.add.text(pad + 18, 26, `${title}\n${wordLabel}`, {
     fontFamily: hostTheme.titleFont,
     fontSize: "28px",
-    color: "#e2e8f0"
+    color: tokens().color.textSoft
   });
 
   scene.add
@@ -114,14 +115,14 @@ export function renderZeichnenUndErratenState(
   scene.add.text(panelX + 14, boardY + 12, en ? "Guesses" : "Tipps", {
     fontFamily: hostTheme.titleFont,
     fontSize: "26px",
-    color: "#f8fafc"
+    color: tokens().color.text
   });
 
   guesses.forEach((entry, index) => {
     scene.add.text(panelX + 14, boardY + 50 + index * 34, `${entry.playerName}: ${entry.guess}`, {
       fontFamily: hostTheme.bodyFont,
       fontSize: "21px",
-      color: entry.correct ? "#4ade80" : "#cbd5e1"
+      color: entry.correct ? "#4ade80" : tokens().color.textSoft
     });
   });
 
@@ -134,7 +135,7 @@ export function renderZeichnenUndErratenState(
     {
       fontFamily: hostTheme.bodyFont,
       fontSize: "20px",
-      color: state.winnerName ? "#4ade80" : "#94a3b8",
+      color: state.winnerName ? "#4ade80" : tokens().color.muted,
       wordWrap: { width: panelWidth - 28 }
     }
   );
@@ -142,7 +143,7 @@ export function renderZeichnenUndErratenState(
   scene.add.text(panelX + 14, boardY + boardHeight - 38, message, {
     fontFamily: hostTheme.bodyFont,
     fontSize: "18px",
-    color: "#94a3b8",
+    color: tokens().color.muted,
     wordWrap: { width: panelWidth - 28 }
   });
 }

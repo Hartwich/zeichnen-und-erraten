@@ -48,7 +48,13 @@ export const zeichnenUndErratenManifest = {
     countdownMs: 2_000,
     resultMs: 4_000,
     scoreboardMs: 4_000
-  }
+  },
+
+  ownsScreens: ["round_intro", "result"],
+  visual: { accent: "#4f7d8c", eyebrow: "Drawing" },
+  audio: { track: { profile: "gentle", bpm: 90, rootMidi: 62, masterGain: 0.11 } },
+  hostChrome: { hud: false, roomCode: false },
+  controllerChrome: { hideSubtitle: true },
 } as const satisfies GameManifest;
 
 export const manifest = zeichnenUndErratenManifest;
