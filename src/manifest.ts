@@ -51,7 +51,7 @@ export const zeichnenUndErratenManifest = {
   },
 
   ownsScreens: ["round_intro", "result"],
-  visual: { accent: "#4f7d8c", eyebrow: "Drawing" },
+  visual: { accent: "#4f7d8c", icon: "brush", eyebrow: "Drawing" },
   audio: { track: { profile: "gentle", bpm: 90, rootMidi: 62, masterGain: 0.11 } },
   hostChrome: { hud: false, roomCode: false },
   controllerChrome: { hideSubtitle: true },
