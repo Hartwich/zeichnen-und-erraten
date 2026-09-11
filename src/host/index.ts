@@ -2,7 +2,7 @@ import Phaser from "phaser";
 import { zeichnenUndErratenManifest } from "../manifest.js";
 import { renderZeichnenUndErratenState } from "./ZeichnenUndErratenRenderer.js";
 import { renderRoundScreens } from "./roundScreens.js";
-import { tokens } from "./platformTheme.js";
+import { bindPlatformTheme, tokens } from "./platformTheme.js";
 
 type SupportedLanguage = "de" | "en";
 
@@ -28,6 +28,7 @@ export class ZeichnenUndErratenHostScene extends Phaser.Scene {
   }
 
   create(): void {
+    bindPlatformTheme(this.registry);
     const client = this.registry.get("hostClient") as HostClientLike;
 
     this.unsubscribe = client.subscribe((state) => {
