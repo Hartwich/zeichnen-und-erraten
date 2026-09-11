@@ -22,7 +22,7 @@ import type {
   ZeichnenUndErratenPublicState,
   ZeichnenUndErratenState
 } from "./zeichnenUndErratenState.js";
-import { drawingColorPalette } from "./zeichnenUndErratenState.js";
+import { drawingColorPalette, resolveDefaultDrawingColor } from "./zeichnenUndErratenState.js";
 
 const roundDurationMs = 90_000;
 const maxGuessFeedEntries = 10;
@@ -548,7 +548,7 @@ export const serverGame: ServerGame<
       wordCategory,
       maskedWord: createMaskedWord(secretWord),
       finishAt: null,
-      currentColor: drawingColorPalette[0] ?? "#f8fafc",
+      currentColor: resolveDefaultDrawingColor(context.theme),
       availableColors: drawingColorPalette,
       strokes: [],
       activeStrokeId: null,
@@ -562,7 +562,7 @@ export const serverGame: ServerGame<
       {
         ...state,
         finishAt: context.now + roundDurationMs,
-        currentColor: drawingColorPalette[0] ?? "#f8fafc",
+        currentColor: resolveDefaultDrawingColor(context.theme),
         strokes: [],
         activeStrokeId: null,
         guesses: [],

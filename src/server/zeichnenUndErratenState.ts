@@ -1,4 +1,4 @@
-import type { BaseRoundState, PlayerInput } from "@open-party-lab/game-core";
+import type { BaseRoundState, GameHostThemeName, PlayerInput } from "@open-party-lab/game-core";
 import type { ZeichnenUndErratenWordCategory } from "../protocol.js";
 
 export interface DrawingPoint {
@@ -58,8 +58,25 @@ export type ZeichnenUndErratenInput =
   | DrawSetColorInput
   | GuessSubmitInput;
 
+/**
+ * The neutral pen each theme starts with.
+ *
+ * The board follows the room's skin, so a single fixed default cannot work:
+ * the palette used to open on white, which is invisible on a light board. The
+ * drawer can still pick either — this only decides which one is already in
+ * hand.
+ */
+const INK_BLACK = "#101418";
+const INK_WHITE = "#f8fafc";
+
+export const drawingInkByTheme: Readonly<Record<GameHostThemeName, string>> = {
+  light: INK_BLACK,
+  dark: INK_WHITE
+};
+
 export const drawingColorPalette = [
-  "#f8fafc",
+  INK_BLACK,
+  INK_WHITE,
   "#ef4444",
   "#f97316",
   "#eab308",
@@ -69,6 +86,10 @@ export const drawingColorPalette = [
   "#a855f7",
   "#ec4899"
 ] as const;
+
+export function resolveDefaultDrawingColor(theme: GameHostThemeName): string {
+  return drawingInkByTheme[theme] ?? drawingInkByTheme.light;
+}
 
 export interface ZeichnenUndErratenState extends BaseRoundState {
   drawerPlayerId: string;

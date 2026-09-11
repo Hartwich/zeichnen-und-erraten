@@ -1,8 +1,17 @@
 import Phaser from "phaser";
-import { tokens } from "./platformTheme.js";
+import { tokens, tokenColor } from "./platformTheme.js";
 
 type SupportedLanguage = "de" | "en";
 
+/**
+ * This screen is chrome, not artwork.
+ *
+ * There is no painted background here — a header, a drawing board and a guess
+ * list, all of them surfaces. They used to be fixed dark slate while the text
+ * on top already read the room's tokens, which in the light theme produced dark
+ * ink on a dark panel. Surfaces and ink now come from the same place, so the
+ * whole screen follows the room.
+ */
 const hostTheme = {
   titleFont: "Arial, Helvetica, sans-serif",
   bodyFont: "Arial, Helvetica, sans-serif"
@@ -34,9 +43,13 @@ export interface ZeichnenUndErratenRenderState {
   winnerName?: string;
 }
 
+/**
+ * A stroke without a colour falls back to the board's own ink, so an older
+ * stroke recorded before a theme switch still contrasts with the board.
+ */
 function parseStrokeColor(color: string | undefined): number {
   if (!color) {
-    return 0xf8fafc;
+    return tokenColor((theme) => theme.color.text);
   }
 
   return Phaser.Display.Color.HexStringToColor(color).color;
@@ -57,9 +70,12 @@ export function renderZeichnenUndErratenState(
   const boardWidth = Math.max(320, width - pad * 2 - 340);
   const boardHeight = Math.max(240, height - boardY - pad);
 
+  const surface = tokenColor((theme) => theme.color.surface);
+  const line = tokenColor((theme) => theme.color.lineStrong);
+
   scene.add
-    .rectangle(width / 2, 56, width - pad * 2, 88, 0x111827, 0.96)
-    .setStrokeStyle(2, 0x334155, 0.8);
+    .rectangle(width / 2, 56, width - pad * 2, 88, surface, 0.96)
+    .setStrokeStyle(2, line, 0.8);
 
   const title = `${en ? "Drawer" : "Zeichner"}: ${state.drawerName ?? "-"}`;
   const wordLabel = state.revealedWord
@@ -72,9 +88,18 @@ export function renderZeichnenUndErratenState(
     color: tokens().color.textSoft
   });
 
+  // The board is the canvas people draw on, so it takes the room's brightest
+  // surface: paper in the light theme, the raised slate in the dark one.
   scene.add
-    .rectangle(boardX + boardWidth / 2, boardY + boardHeight / 2, boardWidth, boardHeight, 0x0b1220, 1)
-    .setStrokeStyle(3, 0x334155, 0.9);
+    .rectangle(
+      boardX + boardWidth / 2,
+      boardY + boardHeight / 2,
+      boardWidth,
+      boardHeight,
+      tokenColor((theme) => theme.color.surfaceRaised),
+      1
+    )
+    .setStrokeStyle(3, line, 0.9);
 
   const graphics = scene.add.graphics();
 
@@ -109,8 +134,8 @@ export function renderZeichnenUndErratenState(
   const guesses = (state.guesses ?? []).slice(-9).reverse();
 
   scene.add
-    .rectangle(panelX + panelWidth / 2, boardY + boardHeight / 2, panelWidth, boardHeight, 0x111827, 0.92)
-    .setStrokeStyle(2, 0x334155, 0.9);
+    .rectangle(panelX + panelWidth / 2, boardY + boardHeight / 2, panelWidth, boardHeight, surface, 0.92)
+    .setStrokeStyle(2, line, 0.9);
 
   scene.add.text(panelX + 14, boardY + 12, en ? "Guesses" : "Tipps", {
     fontFamily: hostTheme.titleFont,
@@ -122,7 +147,7 @@ export function renderZeichnenUndErratenState(
     scene.add.text(panelX + 14, boardY + 50 + index * 34, `${entry.playerName}: ${entry.guess}`, {
       fontFamily: hostTheme.bodyFont,
       fontSize: "21px",
-      color: entry.correct ? "#4ade80" : tokens().color.textSoft
+      color: entry.correct ? tokens().color.success : tokens().color.textSoft
     });
   });
 
@@ -135,7 +160,7 @@ export function renderZeichnenUndErratenState(
     {
       fontFamily: hostTheme.bodyFont,
       fontSize: "20px",
-      color: state.winnerName ? "#4ade80" : tokens().color.muted,
+      color: state.winnerName ? tokens().color.success : tokens().color.muted,
       wordWrap: { width: panelWidth - 28 }
     }
   );
