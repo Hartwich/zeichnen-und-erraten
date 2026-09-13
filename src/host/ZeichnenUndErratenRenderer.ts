@@ -6,7 +6,7 @@ type SupportedLanguage = "de" | "en";
 /**
  * This screen is chrome, not artwork.
  *
- * There is no painted background here — a header, a drawing board and a guess
+ * There is no painted background here — a drawing board and a guess
  * list, all of them surfaces. They used to be fixed dark slate while the text
  * on top already read the room's tokens, which in the light theme produced dark
  * ink on a dark panel. Surfaces and ink now come from the same place, so the
@@ -58,35 +58,24 @@ function parseStrokeColor(color: string | undefined): number {
 export function renderZeichnenUndErratenState(
   scene: Phaser.Scene,
   state: ZeichnenUndErratenRenderState,
-  message: string,
+  _message: string,
   language?: SupportedLanguage
 ): void {
   const en = language === "en";
   const width = scene.scale.width;
   const height = scene.scale.height;
-  const pad = 28;
-  const boardX = pad;
-  const boardY = 120;
-  const boardWidth = Math.max(320, width - pad * 2 - 340);
-  const boardHeight = Math.max(240, height - boardY - pad);
-
+  const pad = 16;
+  const gap = 16;
+  const panelWidth = Math.min(324, width * 0.25);
+  const availableWidth = Math.max(1, width - pad * 2 - gap - panelWidth);
+  const availableHeight = Math.max(1, height - pad * 2);
+  // Match DrawingGuessLayout's 4:3 paper without stretching either axis.
+  const boardWidth = Math.min(availableWidth, availableHeight * 4 / 3);
+  const boardHeight = boardWidth * 3 / 4;
+  const boardX = pad + (availableWidth - boardWidth) / 2;
+  const boardY = pad;
   const surface = tokenColor((theme) => theme.color.surface);
   const line = tokenColor((theme) => theme.color.lineStrong);
-
-  scene.add
-    .rectangle(width / 2, 56, width - pad * 2, 88, surface, 0.96)
-    .setStrokeStyle(2, line, 0.8);
-
-  const title = `${en ? "Drawer" : "Zeichner"}: ${state.drawerName ?? "-"}`;
-  const wordLabel = state.revealedWord
-    ? `${en ? "Word" : "Wort"}: ${state.revealedWord}`
-    : `${en ? "Word" : "Wort"}: ${state.maskedWord ?? "_ _ _"}`;
-
-  scene.add.text(pad + 18, 26, `${title}\n${wordLabel}`, {
-    fontFamily: hostTheme.titleFont,
-    fontSize: "28px",
-    color: tokens().color.textSoft
-  });
 
   // The board is the canvas people draw on, so it takes the room's brightest
   // surface: paper in the light theme, the raised slate in the dark one.
@@ -110,12 +99,12 @@ export function renderZeichnenUndErratenState(
       const p = stroke.points[0];
       if (p) {
         graphics.fillStyle(color, 1);
-        graphics.fillCircle(boardX + p.x * boardWidth, boardY + p.y * boardHeight, 3.5);
+        graphics.fillCircle(boardX + p.x * boardWidth, boardY + p.y * boardHeight, boardWidth * 0.004);
       }
       continue;
     }
 
-    graphics.lineStyle(6, color, 1);
+    graphics.lineStyle(boardWidth * 0.008, color, 1);
     graphics.beginPath();
     stroke.points.forEach((point, index) => {
       const x = boardX + point.x * boardWidth;
@@ -129,9 +118,9 @@ export function renderZeichnenUndErratenState(
     graphics.strokePath();
   }
 
-  const panelX = boardX + boardWidth + 16;
-  const panelWidth = width - panelX - pad;
-  const guesses = (state.guesses ?? []).slice(-9).reverse();
+  const panelX = width - pad - panelWidth;
+  const guessCount = Math.max(1, Math.min(9, Math.floor((boardHeight - 62) / 58)));
+  const guesses = (state.guesses ?? []).slice(-guessCount).reverse();
 
   scene.add
     .rectangle(panelX + panelWidth / 2, boardY + boardHeight / 2, panelWidth, boardHeight, surface, 0.92)
@@ -144,31 +133,13 @@ export function renderZeichnenUndErratenState(
   });
 
   guesses.forEach((entry, index) => {
-    scene.add.text(panelX + 14, boardY + 50 + index * 34, `${entry.playerName}: ${entry.guess}`, {
+    scene.add.text(panelX + 14, boardY + 50 + index * 58, `${entry.playerName}: ${entry.guess}`, {
       fontFamily: hostTheme.bodyFont,
       fontSize: "21px",
+      wordWrap: { width: panelWidth - 28 },
+      maxLines: 2,
       color: entry.correct ? tokens().color.success : tokens().color.textSoft
     });
   });
 
-  scene.add.text(
-    panelX + 14,
-    boardY + boardHeight - 70,
-    state.winnerName
-      ? `${en ? "Winner" : "Gewinner"}: ${state.winnerName}`
-      : en ? "No correct word yet" : "Noch kein korrektes Wort",
-    {
-      fontFamily: hostTheme.bodyFont,
-      fontSize: "20px",
-      color: state.winnerName ? tokens().color.success : tokens().color.muted,
-      wordWrap: { width: panelWidth - 28 }
-    }
-  );
-
-  scene.add.text(panelX + 14, boardY + boardHeight - 38, message, {
-    fontFamily: hostTheme.bodyFont,
-    fontSize: "18px",
-    color: tokens().color.muted,
-    wordWrap: { width: panelWidth - 28 }
-  });
 }

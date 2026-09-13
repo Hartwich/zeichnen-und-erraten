@@ -31,7 +31,9 @@ export class ZeichnenUndErratenHostScene extends Phaser.Scene {
     bindPlatformTheme(this.registry);
     const client = this.registry.get("hostClient") as HostClientLike;
 
-    this.unsubscribe = client.subscribe((state) => {
+    let latestState: HostAppStateLike | undefined;
+    const render = (state: HostAppStateLike) => {
+      latestState = state;
       // Intro and result screens belong to this game, not the platform.
       if (renderRoundScreens(this, state)) {
         return;
@@ -58,9 +60,15 @@ export class ZeichnenUndErratenHostScene extends Phaser.Scene {
         state.game?.message ?? (en ? "The drawer paints while the others guess." : "Der Zeichner malt, die anderen raten."),
         state.room?.language
       );
-    });
+    };
+    this.unsubscribe = client.subscribe(render);
+    const onResize = () => {
+      if (latestState) render(latestState);
+    };
+    this.scale.on(Phaser.Scale.Events.RESIZE, onResize);
 
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      this.scale.off(Phaser.Scale.Events.RESIZE, onResize);
       this.unsubscribe?.();
       this.unsubscribe = undefined;
     });
