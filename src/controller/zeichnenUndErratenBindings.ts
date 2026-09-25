@@ -43,6 +43,10 @@ export function createDrawingSetColorInput(playerId: string, color: string) {
   };
 }
 
+export function createDrawingSetCanvasAspectInput(playerId: string, aspectRatio: number) {
+  return { type: "draw:set-canvas-aspect", playerId, aspectRatio, sentAt: Date.now() };
+}
+
 export function createGuessSubmitInput(playerId: string, guess: string) {
   return {
     type: "guess:submit",

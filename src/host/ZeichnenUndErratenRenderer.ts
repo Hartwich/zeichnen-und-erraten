@@ -37,6 +37,8 @@ interface GuessEntry {
 export interface ZeichnenUndErratenRenderState {
   drawerName?: string;
   maskedWord?: string;
+  finishAt?: number | null;
+  canvasAspectRatio?: number;
   revealedWord?: string;
   strokes?: DrawingStroke[];
   guesses?: GuessEntry[];
@@ -66,14 +68,15 @@ export function renderZeichnenUndErratenState(
   const height = scene.scale.height;
   const pad = 16;
   const gap = 16;
+  const headerHeight = 54;
   const panelWidth = Math.min(324, width * 0.25);
   const availableWidth = Math.max(1, width - pad * 2 - gap - panelWidth);
-  const availableHeight = Math.max(1, height - pad * 2);
-  // Match DrawingGuessLayout's 4:3 paper without stretching either axis.
-  const boardWidth = Math.min(availableWidth, availableHeight * 4 / 3);
-  const boardHeight = boardWidth * 3 / 4;
+  const boardAspect = Math.max(0.4, Math.min(2.5, state.canvasAspectRatio ?? 4 / 3));
+  const availableHeight = Math.max(1, height - pad * 2 - headerHeight - gap);
+  const boardWidth = Math.min(availableWidth, availableHeight * boardAspect);
+  const boardHeight = boardWidth / boardAspect;
   const boardX = pad + (availableWidth - boardWidth) / 2;
-  const boardY = pad;
+  const boardY = pad + headerHeight + gap;
   const surface = tokenColor((theme) => theme.color.surface);
   const line = tokenColor((theme) => theme.color.lineStrong);
 
@@ -121,6 +124,32 @@ export function renderZeichnenUndErratenState(
   const panelX = width - pad - panelWidth;
   const guessCount = Math.max(1, Math.min(9, Math.floor((boardHeight - 62) / 58)));
   const guesses = (state.guesses ?? []).slice(-guessCount).reverse();
+
+  const remainingSeconds = state.finishAt === null || state.finishAt === undefined
+    ? null
+    : Math.max(0, Math.ceil((state.finishAt - Date.now()) / 1_000));
+  const timerText = remainingSeconds === null
+    ? null
+    : `${Math.floor(remainingSeconds / 60)}:${String(remainingSeconds % 60).padStart(2, "0")}`;
+  scene.add.text(pad, pad + 6, `${en ? "Drawing" : "Zeichnet"}: ${state.drawerName ?? "-"}`, {
+    fontFamily: hostTheme.titleFont,
+    fontSize: "28px",
+    color: tokens().color.text
+  });
+  scene.add.text(width * 0.53, pad + 8, `${en ? "Word" : "Wort"}: ${state.revealedWord ?? state.maskedWord ?? ""}`, {
+    fontFamily: hostTheme.bodyFont,
+    fontSize: "22px",
+    color: tokens().color.textSoft
+  });
+  if (timerText !== null) {
+    scene.add.text(width - pad - 150, pad + 2, timerText, {
+      fontFamily: hostTheme.titleFont,
+      fontSize: "38px",
+      color: remainingSeconds !== null && remainingSeconds <= 10 ? tokens().color.danger : tokens().color.text,
+      align: "right",
+      fixedWidth: 150
+    });
+  }
 
   scene.add
     .rectangle(panelX + panelWidth / 2, boardY + boardHeight / 2, panelWidth, boardHeight, surface, 0.92)

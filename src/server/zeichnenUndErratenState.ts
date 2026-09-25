@@ -45,6 +45,11 @@ export interface DrawSetColorInput extends PlayerInput {
   color: string;
 }
 
+export interface DrawSetCanvasAspectInput extends PlayerInput {
+  type: "draw:set-canvas-aspect";
+  aspectRatio: number;
+}
+
 export interface GuessSubmitInput extends PlayerInput {
   type: "guess:submit";
   guess: string;
@@ -56,6 +61,7 @@ export type ZeichnenUndErratenInput =
   | DrawEndInput
   | DrawClearInput
   | DrawSetColorInput
+  | DrawSetCanvasAspectInput
   | GuessSubmitInput;
 
 /**
@@ -98,6 +104,8 @@ export interface ZeichnenUndErratenState extends BaseRoundState {
   wordCategory: ZeichnenUndErratenWordCategory;
   maskedWord: string;
   finishAt: number | null;
+  roundDurationMs: number | null;
+  canvasAspectRatio: number;
   currentColor: string;
   availableColors: readonly string[];
   strokes: DrawingStroke[];
@@ -113,6 +121,8 @@ export interface ZeichnenUndErratenPublicState {
   wordCategory: ZeichnenUndErratenWordCategory;
   maskedWord: string;
   finishAt: number | null;
+  roundDurationMs: number | null;
+  canvasAspectRatio: number;
   currentColor: string;
   availableColors: readonly string[];
   strokes: DrawingStroke[];

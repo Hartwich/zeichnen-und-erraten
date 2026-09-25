@@ -6,10 +6,19 @@ import type {
 type SupportedLanguage = "de" | "en";
 
 export const zeichnenUndErratenRoomSettingKeys = {
-  wordCategory: "zeichnenUndErratenWordCategory"
+  wordCategory: "zeichnenUndErratenWordCategory",
+  roundSeconds: "zeichnenUndErratenRoundSeconds"
 } as const;
 
 const defaultWordCategory: ZeichnenUndErratenWordCategory = "standard";
+export const defaultRoundSeconds = 90;
+
+export function resolveZeichnenUndErratenRoundSeconds(settings: Readonly<Record<string, unknown>>): number | null {
+  const value = settings[zeichnenUndErratenRoomSettingKeys.roundSeconds];
+  if (typeof value !== "number" || !Number.isFinite(value)) return defaultRoundSeconds;
+  if (value === 0) return null;
+  return Math.min(180, Math.max(15, Math.round(value / 15) * 15));
+}
 
 export function isZeichnenUndErratenWordCategory(
   value: unknown

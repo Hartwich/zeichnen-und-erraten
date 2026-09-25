@@ -1,5 +1,6 @@
 import {
   createBaseRoundState,
+  resolveRoundPhaseTimings,
   roundPhaseDurations,
   transitionRoundState,
   type ScoreEntry,
@@ -11,6 +12,7 @@ import type { ZeichnenUndErratenWordCategory } from "../protocol.js";
 import { zeichnenUndErratenManifest } from "../manifest.js";
 import {
   isZeichnenUndErratenWordCategory,
+  resolveZeichnenUndErratenRoundSeconds,
   resolveZeichnenUndErratenWordCategory,
   zeichnenUndErratenRoomSettingKeys
 } from "./zeichnenUndErratenConfig.js";
@@ -24,8 +26,8 @@ import type {
 } from "./zeichnenUndErratenState.js";
 import { drawingColorPalette, resolveDefaultDrawingColor } from "./zeichnenUndErratenState.js";
 
-const roundDurationMs = 90_000;
 const maxGuessFeedEntries = 10;
+const phaseTimings = resolveRoundPhaseTimings(zeichnenUndErratenManifest.phaseDurations);
 
 const zeichnenUndErratenText = {
   de: {
@@ -497,6 +499,8 @@ function toPublicState(state: ZeichnenUndErratenState): ZeichnenUndErratenPublic
     wordCategory: state.wordCategory,
     maskedWord: state.maskedWord,
     finishAt: state.finishAt,
+    roundDurationMs: state.roundDurationMs,
+    canvasAspectRatio: state.canvasAspectRatio,
     currentColor: state.currentColor,
     availableColors: state.availableColors,
     strokes: state.strokes,
@@ -535,11 +539,12 @@ export const serverGame: ServerGame<
     const drawerName =
       context.players.find((player) => player.id === drawerPlayerId)?.name ?? text.drawerFallback;
     const wordCategory = resolveZeichnenUndErratenWordCategory(context.roomSettings);
+    const roundSeconds = resolveZeichnenUndErratenRoundSeconds(context.roomSettings);
     const secretWord = pickWord(context, wordCategory);
 
     return {
       ...createBaseRoundState("round_intro", context.now, {
-        durationMs: roundPhaseDurations.roundIntroMs,
+        durationMs: phaseTimings.roundIntroMs,
         message: text.ready(drawerName)
       }),
       drawerPlayerId,
@@ -548,6 +553,8 @@ export const serverGame: ServerGame<
       wordCategory,
       maskedWord: createMaskedWord(secretWord),
       finishAt: null,
+      roundDurationMs: roundSeconds === null ? null : roundSeconds * 1_000,
+      canvasAspectRatio: 4 / 3,
       currentColor: resolveDefaultDrawingColor(context.theme),
       availableColors: drawingColorPalette,
       strokes: [],
@@ -561,7 +568,7 @@ export const serverGame: ServerGame<
     return transitionRoundState(
       {
         ...state,
-        finishAt: context.now + roundDurationMs,
+        finishAt: state.roundDurationMs === null ? null : context.now + state.roundDurationMs,
         currentColor: resolveDefaultDrawingColor(context.theme),
         strokes: [],
         activeStrokeId: null,
@@ -582,16 +589,26 @@ export const serverGame: ServerGame<
       return null;
     }
 
-    const typedAction = action as { type?: unknown; category?: unknown };
+    const typedAction = action as { type?: unknown; category?: unknown; roundSeconds?: unknown };
 
-    if (typedAction.type !== "configure-lobby" || !isZeichnenUndErratenWordCategory(typedAction.category)) {
+    if (typedAction.type !== "configure-lobby") {
       return null;
     }
 
-    return {
-      roomSettings: {
-        [zeichnenUndErratenRoomSettingKeys.wordCategory]: typedAction.category
+    const roomSettings: Record<string, unknown> = {};
+    if (isZeichnenUndErratenWordCategory(typedAction.category)) {
+      roomSettings[zeichnenUndErratenRoomSettingKeys.wordCategory] = typedAction.category;
+    }
+    if (typeof typedAction.roundSeconds === "number" && Number.isFinite(typedAction.roundSeconds)) {
+      const seconds = Math.round(typedAction.roundSeconds / 15) * 15;
+      if (seconds === 0 || (seconds >= 15 && seconds <= 180)) {
+        roomSettings[zeichnenUndErratenRoomSettingKeys.roundSeconds] = seconds;
       }
+    }
+    if (Object.keys(roomSettings).length === 0) return null;
+
+    return {
+      roomSettings
     };
   },
   handleInput(state, input, context) {
@@ -620,6 +637,15 @@ export const serverGame: ServerGame<
           currentColor: input.color,
           updatedAt: context.now
         };
+      }
+
+      if (input.type === "draw:set-canvas-aspect") {
+        const aspectRatio = input.aspectRatio;
+        if (!Number.isFinite(aspectRatio) || aspectRatio < 0.4 || aspectRatio > 2.5) {
+          return state;
+        }
+        if (Math.abs(state.canvasAspectRatio - aspectRatio) < 0.025) return state;
+        return { ...state, canvasAspectRatio: aspectRatio, updatedAt: context.now };
       }
 
       if (input.type === "draw:start") {

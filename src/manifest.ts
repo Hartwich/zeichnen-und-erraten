@@ -40,12 +40,24 @@ export const zeichnenUndErratenManifest = {
             description: "U18- und Ue18-Begriffe zusammen."
           }
         ]
+      },
+      {
+        kind: "number",
+        id: "roundSeconds",
+        settingKey: "zeichnenUndErratenRoundSeconds",
+        actionKey: "roundSeconds",
+        label: "Rundenzeit in Sekunden (0 = ohne Limit)",
+        description: "Legt fest, wie lange geraten werden kann.",
+        min: 0,
+        max: 180,
+        step: 15,
+        defaultValue: 90
       }
     ]
   },
   phaseDurations: {
-    roundIntroMs: 1_500,
-    countdownMs: 2_000,
+    roundIntroMs: 800,
+    countdownMs: 900,
     resultMs: 4_000,
     scoreboardMs: 4_000
   },
@@ -54,7 +66,7 @@ export const zeichnenUndErratenManifest = {
   visual: { accent: "#4f7d8c", icon: "brush", eyebrow: "Drawing" },
   audio: { track: { profile: "gentle", bpm: 90, rootMidi: 62, masterGain: 0.11 } },
   hostChrome: { hud: false, roomCode: false },
-  controllerChrome: { hideSubtitle: true },
+  controllerChrome: { bare: true, hideSubtitle: true, hideScore: true },
 } as const satisfies GameManifest;
 
 export const manifest = zeichnenUndErratenManifest;

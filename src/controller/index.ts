@@ -4,6 +4,7 @@ import {
   createDrawingClearInput,
   createDrawingEndInput,
   createDrawingMoveInput,
+  createDrawingSetCanvasAspectInput,
   createDrawingSetColorInput,
   createDrawingStartInput,
   createGuessSubmitInput
@@ -34,6 +35,7 @@ interface DrawingGuessLayoutModel {
   wordMask: string;
   secretWord?: string;
   currentColor?: string;
+  canvasAspectRatio: number;
   availableColors?: string[];
   strokes: Array<{ id: string; color: string; points: Array<{ x: number; y: number }> }>;
   guessFeed: Array<{ playerName: string; guess: string; correct: boolean }>;
@@ -43,6 +45,7 @@ interface DrawingGuessLayoutModel {
   onDrawEnd: () => void;
   onClearDrawing: () => void;
   onSelectColor?: (color: string) => void;
+  onSetCanvasAspect: (aspectRatio: number) => void;
   onSubmitGuess: (guess: string) => void;
 }
 
@@ -141,6 +144,7 @@ export function buildZeichnenUndErratenControllerModel(
     maskedWord?: string;
     secretWord?: string;
     currentColor?: string;
+    canvasAspectRatio?: number;
     availableColors?: string[];
     strokes?: Array<{ id: string; color: string; points: Array<{ x: number; y: number }> }>;
     guesses?: Array<{ playerName: string; guess: string; correct: boolean }>;
@@ -163,6 +167,7 @@ export function buildZeichnenUndErratenControllerModel(
     wordMask: drawState.maskedWord ?? "_ _ _",
     secretWord: drawState.secretWord,
     currentColor: drawState.currentColor,
+    canvasAspectRatio: drawState.canvasAspectRatio ?? 4 / 3,
     availableColors: drawState.availableColors,
     strokes: (drawState.strokes ?? []).map((stroke) => ({
       ...stroke,
@@ -175,6 +180,7 @@ export function buildZeichnenUndErratenControllerModel(
     onDrawEnd: () => onInput(createDrawingEndInput(playerId)),
     onClearDrawing: () => onInput(createDrawingClearInput(playerId)),
     onSelectColor: (color) => onInput(createDrawingSetColorInput(playerId, color)),
+    onSetCanvasAspect: (aspectRatio) => onInput(createDrawingSetCanvasAspectInput(playerId, aspectRatio)),
     onSubmitGuess: (guess) => onInput(createGuessSubmitInput(playerId, guess))
   };
 }

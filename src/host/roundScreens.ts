@@ -75,6 +75,7 @@ interface ScoreEntryLike {
 interface RoundScreenState {
   phase: string | null;
   message: string | null;
+  drawerName: string | null;
   language: "de" | "en";
   players: Array<{ id: string; name: string }>;
   entries: ScoreEntryLike[];
@@ -82,14 +83,14 @@ interface RoundScreenState {
 
 const copy = {
   de: {
-    getReady: "Gleich geht es los",
+    getReady: "Als Naechstes zeichnet",
     roundOver: "Runde vorbei",
     standings: "PUNKTESTAND",
     noPoints: "Noch keine Punkte.",
     waiting: "Bereit melden fuer die naechste Runde."
   },
   en: {
-    getReady: "Starting shortly",
+    getReady: "Drawing next",
     roundOver: "Round over",
     standings: "STANDINGS",
     noPoints: "No points yet.",
@@ -100,7 +101,7 @@ const copy = {
 /** Narrows the loosely typed host state this scene receives. */
 function readState(input: unknown): RoundScreenState {
   const state = (input ?? {}) as {
-    game?: { phase?: unknown; message?: unknown } | null;
+    game?: { phase?: unknown; message?: unknown; state?: { drawerName?: unknown } | null } | null;
     room?: { language?: unknown; players?: unknown; currentRound?: { phase?: unknown } | null } | null;
     scoreboard?: { entries?: unknown } | null;
   };
@@ -134,6 +135,7 @@ function readState(input: unknown): RoundScreenState {
   return {
     phase,
     message: typeof state.game?.message === "string" ? state.game.message : null,
+    drawerName: typeof state.game?.state?.drawerName === "string" ? state.game.state.drawerName : null,
     language: state.room?.language === "en" ? "en" : "de",
     players,
     entries
@@ -210,11 +212,11 @@ function renderIntro(scene: Phaser.Scene, state: RoundScreenState): void {
     scene,
     layer,
     scene.scale.width / 2,
-    scene.scale.height / 2 - 60,
-    zeichnenUndErratenManifest.displayName,
+    scene.scale.height / 2 - 44,
+    words.getReady,
     {
       fontFamily: theme.titleFont,
-      fontSize: "56px",
+      fontSize: "30px",
       color: theme.ink,
       align: "center",
       wordWrap: { width: scene.scale.width - 160 }
@@ -225,12 +227,12 @@ function renderIntro(scene: Phaser.Scene, state: RoundScreenState): void {
     scene,
     layer,
     scene.scale.width / 2,
-    scene.scale.height / 2 + 24,
-    state.message ?? words.getReady,
+    scene.scale.height / 2 + 20,
+    state.drawerName ?? state.message ?? zeichnenUndErratenManifest.displayName,
     {
-      fontFamily: theme.bodyFont,
-      fontSize: "24px",
-      color: theme.muted,
+      fontFamily: theme.titleFont,
+      fontSize: "54px",
+      color: theme.accent,
       align: "center",
       wordWrap: { width: scene.scale.width - 220 }
     }

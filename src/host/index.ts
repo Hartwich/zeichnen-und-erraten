@@ -11,6 +11,7 @@ interface HostAppStateLike {
     language?: SupportedLanguage;
   } | null;
   game?: {
+    phase?: string;
     message?: string;
     state?: unknown;
   } | null;
@@ -43,6 +44,8 @@ export class ZeichnenUndErratenHostScene extends Phaser.Scene {
         | {
             drawerName?: string;
             maskedWord?: string;
+            finishAt?: number | null;
+            canvasAspectRatio?: number;
             revealedWord?: string;
             winnerName?: string;
             strokes?: Array<{ id: string; color: string; points: Array<{ x: number; y: number }> }>;
@@ -62,6 +65,13 @@ export class ZeichnenUndErratenHostScene extends Phaser.Scene {
       );
     };
     this.unsubscribe = client.subscribe(render);
+    const timer = this.time.addEvent({
+      delay: 1_000,
+      loop: true,
+      callback: () => {
+        if (latestState?.game?.phase === "playing" && latestState.game.state) render(latestState);
+      }
+    });
     const onResize = () => {
       if (latestState) render(latestState);
     };
@@ -69,6 +79,7 @@ export class ZeichnenUndErratenHostScene extends Phaser.Scene {
 
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       this.scale.off(Phaser.Scale.Events.RESIZE, onResize);
+      timer.remove(false);
       this.unsubscribe?.();
       this.unsubscribe = undefined;
     });
