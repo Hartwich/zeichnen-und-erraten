@@ -20,6 +20,13 @@ export interface GuessEntry {
   correct: boolean;
 }
 
+export interface DrawingScoreEntry {
+  playerId: string;
+  playerName: string;
+  total: number;
+  delta: number;
+}
+
 export interface DrawStartInput extends PlayerInput {
   type: "draw:start";
   x: number;
@@ -98,6 +105,7 @@ export function resolveDefaultDrawingColor(theme: GameHostThemeName): string {
 }
 
 export interface ZeichnenUndErratenState extends BaseRoundState {
+  gameScores: DrawingScoreEntry[];
   drawerPlayerId: string;
   drawerName: string;
   secretWord: string;
@@ -116,6 +124,7 @@ export interface ZeichnenUndErratenState extends BaseRoundState {
 }
 
 export interface ZeichnenUndErratenPublicState {
+  gameScores: DrawingScoreEntry[];
   drawerPlayerId: string;
   drawerName: string;
   wordCategory: ZeichnenUndErratenWordCategory;

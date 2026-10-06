@@ -46,6 +46,7 @@ export class ZeichnenUndErratenHostScene extends Phaser.Scene {
             maskedWord?: string;
             finishAt?: number | null;
             canvasAspectRatio?: number;
+            gameScores?: Array<{ playerId: string; playerName: string; total: number; delta: number }>;
             revealedWord?: string;
             winnerName?: string;
             strokes?: Array<{ id: string; color: string; points: Array<{ x: number; y: number }> }>;

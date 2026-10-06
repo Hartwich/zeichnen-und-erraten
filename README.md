@@ -8,6 +8,8 @@ Drawing and guessing party game for Open Party Lab with phone drawing controls a
 
 Beta. The drawing and guessing loop is already good to play locally. Still needs drawing-feel refinement, category/content review, and result presentation polish before a stable release.
 
+After a correct guess or timeout, the host keeps the drawing visible and replaces the guess list with the revealed word and this game's standings, including each round's point gain. The correct guesser and drawer each earn one point. These totals carry through consecutive Draw & Guess rounds and start at zero for a new game session; room-wide scores are not used in this panel.
+
 ## Run Through Open Party Lab
 
 This repo is not a standalone app. Run it through the Open Party Lab platform.

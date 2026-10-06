@@ -633,8 +633,15 @@ function buildScore(state: ZeichnenUndErratenState): ScoreEntry[] {
   return entries;
 }
 
-function toPublicState(state: ZeichnenUndErratenState): ZeichnenUndErratenPublicState {
+function toPublicState(state: ZeichnenUndErratenState, context: ServerGameContext): ZeichnenUndErratenPublicState {
+  const scoresById = new Map(state.gameScores.map((entry) => [entry.playerId, entry]));
   return {
+    gameScores: context.players.map((player) => ({
+      playerId: player.id,
+      playerName: player.name,
+      total: scoresById.get(player.id)?.total ?? 0,
+      delta: scoresById.get(player.id)?.delta ?? 0
+    })),
     drawerPlayerId: state.drawerPlayerId,
     drawerName: state.drawerName,
     wordCategory: state.wordCategory,
@@ -654,12 +661,13 @@ function toPublicState(state: ZeichnenUndErratenState): ZeichnenUndErratenPublic
 
 function toControllerStateForPlayer(
   state: ZeichnenUndErratenState,
+  context: ServerGameContext,
   playerId: string
 ): ZeichnenUndErratenControllerState {
   const isDrawer = state.drawerPlayerId === playerId;
 
   return {
-    ...toPublicState(state),
+    ...toPublicState(state, context),
     isDrawer,
     secretWord: isDrawer ? state.secretWord : undefined
   };
@@ -682,12 +690,23 @@ export const serverGame: ServerGame<
     const wordCategory = resolveZeichnenUndErratenWordCategory(context.roomSettings);
     const roundSeconds = resolveZeichnenUndErratenRoundSeconds(context.roomSettings);
     const secretWord = pickWord(context, wordCategory);
+    const previous = context.previousRound?.gameId === zeichnenUndErratenManifest.id
+      && context.previousRound.phase === "finished"
+      ? context.previousRound.state as Partial<ZeichnenUndErratenState> | null
+      : null;
+    const previousTotals = new Map((previous?.gameScores ?? []).map((entry) => [entry.playerId, entry.total]));
 
     return {
       ...createBaseRoundState("round_intro", context.now, {
         durationMs: phaseTimings.roundIntroMs,
         message: text.ready(drawerName)
       }),
+      gameScores: context.players.map((player) => ({
+        playerId: player.id,
+        playerName: player.name,
+        total: previousTotals.get(player.id) ?? 0,
+        delta: 0
+      })),
       drawerPlayerId,
       drawerName,
       secretWord,
@@ -866,7 +885,12 @@ export const serverGame: ServerGame<
           ...state,
           guesses,
           winnerPlayerId: input.playerId,
-          winnerName: playerName
+          winnerName: playerName,
+          gameScores: context.players.map((player) => {
+            const delta = player.id === input.playerId || player.id === state.drawerPlayerId ? 1 : 0;
+            const total = state.gameScores.find((entry) => entry.playerId === player.id)?.total ?? 0;
+            return { playerId: player.id, playerName: player.name, total: total + delta, delta };
+          })
         },
         "locked",
         context.now,
@@ -900,10 +924,10 @@ export const serverGame: ServerGame<
   buildScore(state) {
     return buildScore(state);
   },
-  toPublicState(state) {
-    return toPublicState(state);
+  toPublicState(state, context) {
+    return toPublicState(state, context);
   },
-  toControllerStateForPlayer(state, _context, playerId) {
-    return toControllerStateForPlayer(state, playerId);
+  toControllerStateForPlayer(state, context, playerId) {
+    return toControllerStateForPlayer(state, context, playerId);
   }
 };
