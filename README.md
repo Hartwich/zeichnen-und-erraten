@@ -2,6 +2,8 @@
 
 Drawing and guessing party game for Open Party Lab with phone drawing controls and word categories.
 
+The Ü18 category now has an expanded pool of explicit anatomy and sex terms, sexual slang, profanity, alcohol and cannabis prompts. Select Ü18 or the combined category in setup to use them; U18 retains its separate family-friendly pool.
+
 ![In-game screenshot](docs/screenshots/host.png)
 
 ## Status
