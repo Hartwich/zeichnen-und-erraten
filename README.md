@@ -2,6 +2,8 @@
 
 Drawing and guessing party game for Open Party Lab with phone drawing controls and word categories.
 
+The drawer sees pointer strokes immediately through a local preview, even while waiting for the server echo. Bounded client correlation IDs match the preview to the authoritative stroke without changing server-owned stroke IDs or rules. Clearing also hides delayed echoes of earlier strokes. Controller component checks cover a two-second echo delay, quick consecutive strokes, clearing, touch movement, release endpoints, round reset and portrait/landscape layouts; physical-phone WLAN latency remains unverified.
+
 The Ü18 category now has an expanded pool of explicit anatomy and sex terms, sexual slang, profanity, alcohol and cannabis prompts. Select Ü18 or the combined category in setup to use them; U18 retains its separate family-friendly pool.
 
 ![In-game screenshot](docs/screenshots/host.png)

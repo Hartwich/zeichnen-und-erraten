@@ -1,6 +1,7 @@
-export function createDrawingStartInput(playerId: string, x: number, y: number) {
+export function createDrawingStartInput(playerId: string, x: number, y: number, clientStrokeId?: string) {
   return {
     type: "draw:start",
+    clientStrokeId,
     playerId,
     x,
     y,

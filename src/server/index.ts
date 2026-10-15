@@ -931,7 +931,13 @@ export const serverGame: ServerGame<
         return {
           ...state,
           activeStrokeId: strokeId,
-          strokes: [...state.strokes, { id: strokeId, color: state.currentColor, points: [point] }],
+          strokes: [...state.strokes, {
+            id: strokeId,
+            clientStrokeId: typeof input.clientStrokeId === "string" && /^[a-zA-Z0-9-]{1,80}$/.test(input.clientStrokeId)
+              ? input.clientStrokeId : undefined,
+            color: state.currentColor,
+            points: [point]
+          }],
           updatedAt: context.now
         };
       }

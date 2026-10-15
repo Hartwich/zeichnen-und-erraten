@@ -37,10 +37,10 @@ interface DrawingGuessLayoutModel {
   currentColor?: string;
   canvasAspectRatio: number;
   availableColors?: string[];
-  strokes: Array<{ id: string; color: string; points: Array<{ x: number; y: number }> }>;
+  strokes: Array<{ id: string; clientStrokeId?: string; color: string; points: Array<{ x: number; y: number }> }>;
   guessFeed: Array<{ playerName: string; guess: string; correct: boolean }>;
   winnerName?: string;
-  onDrawStart: (x: number, y: number) => void;
+  onDrawStart: (x: number, y: number, clientStrokeId?: string) => void;
   onDrawMove: (x: number, y: number) => void;
   onDrawEnd: () => void;
   onClearDrawing: () => void;
@@ -146,7 +146,7 @@ export function buildZeichnenUndErratenControllerModel(
     currentColor?: string;
     canvasAspectRatio?: number;
     availableColors?: string[];
-    strokes?: Array<{ id: string; color: string; points: Array<{ x: number; y: number }> }>;
+    strokes?: Array<{ id: string; clientStrokeId?: string; color: string; points: Array<{ x: number; y: number }> }>;
     guesses?: Array<{ playerName: string; guess: string; correct: boolean }>;
     winnerName?: string;
   };
@@ -175,7 +175,7 @@ export function buildZeichnenUndErratenControllerModel(
     })),
     guessFeed: drawState.guesses ?? [],
     winnerName: drawState.winnerName,
-    onDrawStart: (x, y) => onInput(createDrawingStartInput(playerId, x, y)),
+    onDrawStart: (x, y, clientStrokeId) => onInput(createDrawingStartInput(playerId, x, y, clientStrokeId)),
     onDrawMove: (x, y) => onInput(createDrawingMoveInput(playerId, x, y)),
     onDrawEnd: () => onInput(createDrawingEndInput(playerId)),
     onClearDrawing: () => onInput(createDrawingClearInput(playerId)),

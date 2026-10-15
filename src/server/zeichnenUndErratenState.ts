@@ -8,6 +8,7 @@ export interface DrawingPoint {
 
 export interface DrawingStroke {
   id: string;
+  clientStrokeId?: string;
   color: string;
   points: DrawingPoint[];
 }
@@ -29,6 +30,7 @@ export interface DrawingScoreEntry {
 
 export interface DrawStartInput extends PlayerInput {
   type: "draw:start";
+  clientStrokeId?: string;
   x: number;
   y: number;
 }

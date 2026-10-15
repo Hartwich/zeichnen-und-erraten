@@ -66,3 +66,17 @@ test('late joiners appear at zero even when nobody guessed the word', () => {
     playerId: 'late', playerName: 'Late joiner', total: 0, delta: 0
   });
 });
+
+test('drawing echoes a bounded client correlation ID while the server owns the stroke', () => {
+  const ctx = context();
+  const playing = serverGame.startRound(serverGame.createInitialState(ctx), ctx);
+  const input = { type: 'draw:start', playerId: playing.drawerPlayerId, x: 0.2, y: 0.3, clientStrokeId: 'local-preview-123', sentAt: ctx.now };
+  const drawn = serverGame.handleInput(playing, input, ctx);
+  assert.equal(drawn.strokes[0].clientStrokeId, input.clientStrokeId);
+  assert.notEqual(drawn.strokes[0].id, input.clientStrokeId);
+  assert.equal(serverGame.toControllerStateForPlayer(drawn, ctx, input.playerId).strokes[0].clientStrokeId, input.clientStrokeId);
+  const outsider = ctx.players.find(player => player.id !== input.playerId).id;
+  assert.equal(serverGame.handleInput(playing, { ...input, playerId: outsider }, ctx), playing);
+  const invalid = serverGame.handleInput(playing, { ...input, clientStrokeId: 'x'.repeat(81) }, ctx);
+  assert.equal(invalid.strokes[0].clientStrokeId, undefined);
+});
